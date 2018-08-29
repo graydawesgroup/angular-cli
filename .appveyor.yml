@@ -1,24 +1,25 @@
 environment:
-  matrix:
-    - nodejs_version: "6"
+  # Note: if updating to Node 10, use at least 10.5.0 to include a fix for
+  # https://github.com/nodejs/node/issues/20297
+  nodejs_version: "8.9.2" # Same version as used in CircleCI.
 
 matrix:
   fast_finish: true
 
 install:
   - ps: Install-Product node $env:nodejs_version
-  - npm install -g npm@~5.6.0
-  - npm install
-  - choco install googlechrome
+  - yarn install --frozen-lockfile
+  - npm run webdriver-update-appveyor
 
 test_script:
   - node --version
-  - npm --version
-  - npm run test:packages
-  - npm run test:cli
-  - node tests\run_e2e.js --appveyor "--glob=tests/{basic,commands,generate,build/styles}/**"
+  - yarn --version
+  - yarn test
+  - node tests\legacy-cli\run_e2e.js --appveyor "--glob=tests/{basic,commands,generate,build/styles}/**"
 
 build: off
+deploy: off
 
 cache:
-  - node_modules -> package-lock.json
+  - node_modules -> yarn.lock
+  - "%LOCALAPPDATA%\\Yarn"
